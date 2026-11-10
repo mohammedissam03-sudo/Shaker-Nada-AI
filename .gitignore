@@ -52,3 +52,5 @@ dist/
 # Python virtual environments
 .venv/
 venv/
+
+/package-lock.json
