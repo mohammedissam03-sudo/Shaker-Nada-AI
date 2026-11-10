@@ -1,0 +1,9 @@
+
+{
+  "gender": "female",
+  "date_of_birth": "2003-07-02",
+  "height_cm": 175,
+  "weight_kg": 75,
+  "fitness_goal": "muscle_gain",
+  "activity_level": "beginner"
+}
