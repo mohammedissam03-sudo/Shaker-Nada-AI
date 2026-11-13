@@ -1,0 +1,40 @@
+
+[
+  {
+    "id": 1,
+    "name": "Demo Gym A",
+    "activities": ["swimming", "fitness", "boxing"],
+    "facilities": ["pool", "parking", "showers"],
+    "latitude": 31.95,
+    "longitude": 35.93,
+    "opening_hours": {
+      "monday": {
+        "open": "06:00",
+        "close": "22:00"
+      }
+    }
+  },
+  {
+    "id": 2,
+    "name": "Demo Gym B",
+    "activities": ["fitness", "yoga"],
+    "facilities": ["parking", "lockers"],
+    "latitude": 31.97,
+    "longitude": 35.95,
+    "opening_hours": {
+      "monday": {
+        "open": "08:00",
+        "close": "20:00"
+      }
+    }
+  },
+  {
+    "id": 3,
+    "name": "Demo Gym C",
+    "activities": ["boxing"],
+    "facilities": null,
+    "latitude": null,
+    "longitude": null,
+    "opening_hours": null
+  }
+]

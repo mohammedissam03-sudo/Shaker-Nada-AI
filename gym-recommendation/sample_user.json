@@ -1,0 +1,28 @@
+
+{
+  "user_id": 1,
+  "preferred_activities": [
+    "swimming",
+    "fitness",
+    "boxing"
+  ],
+  "preferred_facilities": [
+    "pool",
+    "parking"
+  ],
+  "required_facilities": [
+    "pool"
+  ],
+  "location": {
+    "latitude": 31.96,
+    "longitude": 35.94
+  },
+  "max_distance_km": 5,
+  "require_max_distance": true,
+  "available_times": {
+    "monday": {
+      "start": "18:00",
+      "end": "20:00"
+    }
+  }
+}
