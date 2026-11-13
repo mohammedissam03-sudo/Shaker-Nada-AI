@@ -1,0 +1,29 @@
+
+name: Backend SQLite Tests
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sqlite-tests:
+    name: Test SQLite Storage
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+
+      - name: Run SQLite unit tests
+        working-directory: ai-backend
+        run: python -m unittest discover -s tests -p "test_*.py" -v
