@@ -2,6 +2,10 @@
 import sqlite3
 from pathlib import Path
 
+from contextlib import closing
+
+from datetime import datetime, timedelta, timezone
+
 # Folder containing this Python file
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -17,7 +21,8 @@ def init_db():
         exist_ok=True
     )
 
-    with sqlite3.connect(DB_PATH) as conn:
+
+    with closing(sqlite3.connect(DB_PATH)) as conn, conn:
 
         conn.execute("PRAGMA foreign_keys = ON")
 
@@ -56,7 +61,8 @@ def save_turn(
     user_message: str,
     assistant_reply: str
 ):
-    with sqlite3.connect(DB_PATH) as conn:
+
+    with closing(sqlite3.connect(DB_PATH)) as conn, conn:
 
         conn.execute("PRAGMA foreign_keys = ON")
 
@@ -105,7 +111,8 @@ def save_turn(
 def get_conversation(conversation_id: str):
 
     # Connect to SQLite database
-    with sqlite3.connect(DB_PATH) as conn:
+
+    with closing(sqlite3.connect(DB_PATH)) as conn, conn:
 
         # Find the conversation
         session = conn.execute(
@@ -143,6 +150,81 @@ def get_conversation(conversation_id: str):
                 for role, content in messages
             ]
         }
+
+def cleanup_old_conversations(
+    retention_days: int = 30,
+    dry_run: bool = True,
+    db_path=None
+):
+    """
+    Find or delete inactive conversations.
+
+    dry_run=True: Preview only.
+    dry_run=False: Delete expired conversations.
+    """
+
+    if type(retention_days) is not int or retention_days < 1:
+        raise ValueError(
+            "retention_days must be a positive integer"
+        )
+
+    database = Path(db_path) if db_path is not None else DB_PATH
+
+    if not database.is_file():
+        raise FileNotFoundError(
+            f"Database not found: {database}"
+        )
+
+    cutoff = (
+        datetime.now(timezone.utc)
+        - timedelta(days=retention_days)
+    ).strftime("%Y-%m-%d %H:%M:%S")
+
+
+    with closing(sqlite3.connect(database, timeout=10)) as conn, conn:
+
+        # Required for ON DELETE CASCADE
+        conn.execute("PRAGMA foreign_keys = ON")
+
+        # Lock writes during real cleanup
+        if not dry_run:
+            conn.execute("BEGIN IMMEDIATE")
+
+        expired = conn.execute(
+            """
+            SELECT c.id
+            FROM conversations c
+            LEFT JOIN messages m
+                ON m.conversation_id = c.id
+            GROUP BY c.id, c.created_at
+            HAVING COALESCE(
+                MAX(m.created_at),
+                c.created_at
+            ) < ?
+            """,
+            (cutoff,)
+        ).fetchall()
+
+        deleted_count = 0
+
+        if not dry_run:
+            for (conversation_id,) in expired:
+                cursor = conn.execute(
+                    """
+                    DELETE FROM conversations
+                    WHERE id = ?
+                    """,
+                    (conversation_id,)
+                )
+                deleted_count += cursor.rowcount
+
+    return {
+        "dry_run": dry_run,
+        "retention_days": retention_days,
+        "cutoff_utc": cutoff,
+        "expired_count": len(expired),
+        "deleted_count": deleted_count
+    }
 
 if __name__ == "__main__":
     init_db()
