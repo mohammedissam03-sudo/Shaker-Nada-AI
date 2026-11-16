@@ -1,0 +1,55 @@
+
+/* Shaker & Nada - 3D Robot Container */
+
+#optifit-robot3d-root {
+    position: fixed;
+
+    right: 20px;
+    bottom: 20px;
+
+    width: 210px;
+    height: 260px;
+
+    z-index: 990;
+
+    background: transparent;
+    overflow: visible;
+
+    /*
+     * Keep the current Laravel UI clickable.
+     * Interaction will be enabled in a later step.
+     */
+    pointer-events: none;
+}
+
+/* Three.js Canvas */
+#optifit-robot3d-root canvas {
+    display: block;
+
+    width: 100%;
+    height: 100%;
+
+    background: transparent;
+}
+
+/* Tablet screens */
+@media (max-width: 900px) {
+    #optifit-robot3d-root {
+        width: 170px;
+        height: 210px;
+
+        right: 12px;
+        bottom: 12px;
+    }
+}
+
+/* Mobile screens */
+@media (max-width: 600px) {
+    #optifit-robot3d-root {
+        width: 130px;
+        height: 165px;
+
+        right: 8px;
+        bottom: 8px;
+    }
+}

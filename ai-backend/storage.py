@@ -36,6 +36,21 @@ def init_db():
             )
         """)
 
+        # Add conversation ownership without deleting existing data.
+        existing_columns = {
+            row[1]
+            for row in conn.execute(
+                "PRAGMA table_info(conversations)"
+            ).fetchall()
+        }
+
+        if "owner_id" not in existing_columns:
+            conn.execute(
+                "ALTER TABLE conversations "
+                "ADD COLUMN owner_id TEXT"
+            )
+
+
         # Store individual chat messages
         conn.execute("""
             CREATE TABLE IF NOT EXISTS messages (
@@ -140,6 +155,134 @@ def get_conversation(conversation_id: str):
         ).fetchall()
 
         # Return conversation data
+        return {
+            "gender": session[0],
+            "history": [
+                {
+                    "role": role,
+                    "content": content
+                }
+                for role, content in messages
+            ]
+        }
+
+def save_turn_for_owner(
+    conversation_id: str,
+    owner_id: str,
+    gender: str,
+    user_message: str,
+    assistant_reply: str
+):
+    """
+    Save a conversation turn only for its owner.
+    """
+
+    if not isinstance(owner_id, str) or not owner_id.strip():
+        raise ValueError("A valid owner_id is required")
+
+    if gender not in ("male", "female"):
+        raise ValueError("Invalid gender")
+
+    if not conversation_id:
+        raise ValueError("Conversation ID is required")
+
+    with closing(sqlite3.connect(DB_PATH, timeout=10)) as conn:
+        conn.execute("PRAGMA foreign_keys = ON")
+        conn.execute("BEGIN IMMEDIATE")
+
+        try:
+            existing = conn.execute(
+                """
+                SELECT owner_id, gender
+                FROM conversations
+                WHERE id = ?
+                """,
+                (conversation_id,)
+            ).fetchone()
+
+            if existing is None:
+                conn.execute(
+                    """
+                    INSERT INTO conversations
+                    (id, gender, owner_id)
+                    VALUES (?, ?, ?)
+                    """,
+                    (conversation_id, gender, owner_id)
+                )
+            else:
+                stored_owner, stored_gender = existing
+
+                if stored_owner != owner_id:
+                    raise PermissionError(
+                        "Conversation access denied"
+                    )
+
+                if stored_gender != gender:
+                    raise ValueError(
+                        "Conversation persona mismatch"
+                    )
+
+            conn.execute(
+                """
+                INSERT INTO messages
+                (conversation_id, role, content)
+                VALUES (?, 'user', ?)
+                """,
+                (conversation_id, user_message)
+            )
+
+            conn.execute(
+                """
+                INSERT INTO messages
+                (conversation_id, role, content)
+                VALUES (?, 'model', ?)
+                """,
+                (conversation_id, assistant_reply)
+            )
+
+            conn.commit()
+
+        except Exception:
+            conn.rollback()
+            raise
+
+def get_conversation_for_owner(
+    conversation_id: str,
+    owner_id: str
+):
+    """
+    Retrieve a conversation only when it belongs
+    to the specified owner.
+    """
+
+    if not isinstance(owner_id, str) or not owner_id.strip():
+        raise ValueError("A valid owner_id is required")
+
+    with closing(sqlite3.connect(DB_PATH)) as conn:
+
+        session = conn.execute(
+            """
+            SELECT gender
+            FROM conversations
+            WHERE id = ?
+              AND owner_id = ?
+            """,
+            (conversation_id, owner_id)
+        ).fetchone()
+
+        if session is None:
+            return None
+
+        messages = conn.execute(
+            """
+            SELECT role, content
+            FROM messages
+            WHERE conversation_id = ?
+            ORDER BY id ASC
+            """,
+            (conversation_id,)
+        ).fetchall()
+
         return {
             "gender": session[0],
             "history": [

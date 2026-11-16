@@ -1,8 +1,8 @@
-
-import demoProfile from './data/demoProfile.json';
-import { getCharacter } from './assistant/PersonaManager.js';
 import './style.css';
-
+import { createRobot3D } from './assistant/Robot3D.js';
+import './assistant/robot3d.css';
+import { createChatWidget } from './assistant/ChatWidget.js';
+import './assistant/chat-widget.css';
 const app = document.querySelector('#app');
 
 app.innerHTML = `
@@ -61,40 +61,122 @@ app.innerHTML = `
             </div>
           </div>
 
+<div class="field-grid">
+
+  <div>
+    <label for="fitness-goal">الهدف الرياضي</label>
+    <select
+      id="fitness-goal"
+      name="fitness_goal"
+      required
+    >
+      <option value="">اختر هدفك</option>
+      <option value="muscle_gain">بناء العضلات</option>
+      <option value="fat_loss">خسارة الدهون</option>
+      <option value="general_fitness">تحسين اللياقة العامة</option>
+    </select>
+  </div>
+
+  <div>
+    <label for="activity-level">مستوى النشاط</label>
+    <select
+      id="activity-level"
+      name="activity_level"
+      required
+    >
+      <option value="">اختر مستواك</option>
+      <option value="beginner">مبتدئ</option>
+      <option value="intermediate">متوسط</option>
+      <option value="advanced">متقدم</option>
+    </select>
+  </div>
+
+</div>
+
           <button class="save-btn" type="submit">
             متابعة
           </button>
         </form>
       </div>
 
-      <aside class="assistant-panel">
-        <div class="assistant-avatar" aria-hidden="true">
-          <div class="antenna"></div>
-          <div class="robot-head">
-            <div class="robot-face">
-              <span class="eye"></span>
-              <span class="eye"></span>
-            </div>
-          </div>
-          <div class="robot-body"></div>
-          <div class="shadow"></div>
-        </div>
 
-        <h2 id="assistant-name">شاكر — Shaker</h2>
-        <p class="assistant-role">Your AI Fitness Companion</p>
+<aside class="assistant-panel">
+  <h2 id="assistant-name">شاكر — Shaker</h2>
 
-        <div class="speech-bubble" id="assistant-message"
-             role="status" aria-live="polite">
-          مرحباً! أنا شاكر، رح أساعدك في رحلتك الرياضية.
-        </div>
+  <p class="assistant-role">
+    Your AI Fitness Companion
+  </p>
 
-        <p class="demo-note">
-          نموذج بصري مؤقت — سيتم استبداله بروبوت 3D
-        </p>
-      </aside>
+  <div
+    class="speech-bubble"
+    id="assistant-message"
+    role="status"
+    aria-live="polite"
+  >
+    مرحباً! أنا شاكر، رح أساعدك في رحلتك الرياضية.
+  </div>
+</aside>
+
     </section>
+        <div id="optifit-robot3d-root"></div>
+
   </main>
 `;
+
+
+const robot3dRoot = document.querySelector('#optifit-robot3d-root');
+
+// Start with Shaker
+let currentRobotGender = 'male';
+
+let robot3DInstance = createRobot3D(
+  robot3dRoot,
+  currentRobotGender
+);
+
+/**
+ * Listen for chatbot activity and update
+ * the current 3D robot animation.
+ */
+
+
+window.addEventListener('assistant:chat-state', (event) => {
+  const state = event.detail?.state;
+
+  if (!['idle', 'thinking', 'happy', 'tired'].includes(state)) {
+    return;
+  }
+
+  robot3DInstance.setState(state);
+});
+
+
+
+const chatWidget = createChatWidget(robot3dRoot);
+
+// Switch between Shaker and Nada
+window.addEventListener('assistant:gender-change', (event) => {
+  const newGender = event.detail?.gender;
+
+  if (
+    !['male', 'female'].includes(newGender) ||
+    newGender === currentRobotGender
+  ) {
+    return;
+  }
+
+  // Remove the previous 3D robot
+  robot3DInstance.destroy();
+
+  // Create the selected robot
+  robot3DInstance = createRobot3D(
+    robot3dRoot,
+    newGender
+  );
+
+  currentRobotGender = newGender;
+});
+
 
 let selectedGender = 'male';
 
@@ -167,12 +249,16 @@ form.addEventListener('submit', event => {
 
   if (!form.reportValidity()) return;
 
-  const profile = {
-    gender: selectedGender,
-    date_of_birth: dobInput.value,
-    height_cm: Number(form.height_cm.value),
-    weight_kg: Number(form.weight_kg.value)
-  };
+
+const profile = {
+  gender: selectedGender,
+  date_of_birth: dobInput.value,
+  height_cm: Number(form.height_cm.value),
+  weight_kg: Number(form.weight_kg.value),
+  fitness_goal: form.elements.namedItem('fitness_goal').value,
+  activity_level: form.elements.namedItem('activity_level').value
+};
+
 
   const age = calculateAge(profile.date_of_birth);
 
@@ -198,33 +284,3 @@ form.addEventListener('submit', event => {
 });
 
 setGender('male');
-
-console.log('Shaker & Nada - Demo Profile:', demoProfile);
-
-
-const character = getCharacter(demoProfile.gender);
-
-document.documentElement.dataset.theme = character.theme;
-
-console.log("Selected Character:", character);
-
-let preview = document.querySelector("#persona-preview");
-
-if (!preview) {
-  preview = document.createElement("div");
-  preview.id = "persona-preview";
-  document.querySelector("#app").prepend(preview);
-}
-
-preview.textContent =
-  `المساعد المختار: ${character.arabicName} (${character.name})`;
-
-preview.style.cssText = `
-  padding: 16px;
-  margin: 20px;
-  border-radius: 14px;
-  text-align: center;
-  font-weight: bold;
-  background: ${character.color};
-  color: white;
-`;
