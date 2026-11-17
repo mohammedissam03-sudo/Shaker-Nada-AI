@@ -370,3 +370,68 @@ backdrop-filter: blur(26px);
     opacity: 1;
   }
 }
+
+/* Mobile Chat — Separate Panel from Robot */
+@media (max-width: 640px) {
+  .sn-chat-panel {
+    position: fixed;
+
+    left: 10px;
+    right: 10px;
+
+    top: max(8px, env(safe-area-inset-top));
+    bottom: auto;
+
+    width: auto;
+
+    height: min(
+      570px,
+      calc(
+        100dvh
+        - clamp(140px, 42vw, 183px)
+        - 28px
+        - env(safe-area-inset-top)
+        - env(safe-area-inset-bottom)
+      )
+    );
+
+    max-height: none;
+    border-radius: 22px;
+  }
+
+  .sn-chat-messages {
+    min-height: 0;
+    overflow-y: auto;
+  }
+
+  .sn-chat-form {
+    flex-shrink: 0;
+  }
+}
+
+/* Mobile Chat - More Balanced Layout */
+@media (max-width: 640px) {
+  .sn-chat-panel {
+    top: max(10px, env(safe-area-inset-top));
+    bottom: auto;
+
+    height: min(60dvh, 480px);
+
+    max-height: calc(
+      100dvh - clamp(126px, 34vw, 150px) - 32px
+    );
+
+    min-height: 0;
+  }
+
+  .sn-chat-messages {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .sn-chat-form {
+    flex-shrink: 0;
+  }
+}

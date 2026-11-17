@@ -53,3 +53,25 @@
         bottom: 8px;
     }
 }
+
+/* Mobile Robot — Responsive V2 */
+@media (max-width: 640px) {
+  #optifit-robot3d-root {
+    width: clamp(110px, 33vw, 145px);
+    height: clamp(140px, 42vw, 183px);
+
+    right: max(8px, env(safe-area-inset-right));
+    bottom: max(10px, env(safe-area-inset-bottom));
+  }
+}
+
+/* Mobile Robot - Compact Size */
+@media (max-width: 640px) {
+  #optifit-robot3d-root {
+    width: clamp(100px, 27vw, 120px);
+    height: clamp(126px, 34vw, 150px);
+
+    right: max(8px, env(safe-area-inset-right));
+    bottom: max(8px, env(safe-area-inset-bottom));
+  }
+}
