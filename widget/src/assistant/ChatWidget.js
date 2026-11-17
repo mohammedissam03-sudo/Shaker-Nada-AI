@@ -479,10 +479,23 @@ setRobotState('thinking');
 
     addMessage('user', message);
 
-    const responseBubble = addMessage(
-      'assistant',
-      'لحظة، عم بفكّر بإجابتك...'
-    );
+
+const responseBubble = addMessage(
+  'assistant',
+  ''
+);
+
+// Animated typing indicator while waiting for Gemini
+responseBubble.innerHTML = `
+  <span class="sn-typing-dots"
+        role="status"
+        aria-label="جارٍ إعداد الإجابة">
+    <span></span>
+    <span></span>
+    <span></span>
+  </span>
+`;
+
 
     try {
       const response = await fetch(API_URL, {
