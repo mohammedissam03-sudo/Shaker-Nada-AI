@@ -1,5 +1,5 @@
-
 import * as THREE from 'three';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { getCharacter } from './PersonaManager.js';
 
 export function createRobot3D(container, gender = 'male') {
@@ -70,27 +70,28 @@ export function createRobot3D(container, gender = 'male') {
     emissiveIntensity: 1.5
   });
 
-  // 4. Head
-  const head = new THREE.Mesh(
-    new THREE.BoxGeometry(1.65, 1.15, 0.75),
-    shellMaterial
-  );
-  head.position.y = 0.65;
-  robot.add(head);
+  
+// 4. Head
+const head = new THREE.Mesh(
+  new RoundedBoxGeometry(1.55, 1.18, 0.82, 8, 0.22),
+  shellMaterial
+);
+head.position.y = 0.65;
+robot.add(head);
 
-  const face = new THREE.Mesh(
-    new THREE.BoxGeometry(1.4, 0.85, 0.08),
-    faceMaterial
-  );
-  face.position.set(0, 0.65, 0.42);
-  robot.add(face);
+const face = new THREE.Mesh(
+  new RoundedBoxGeometry(1.08, 0.78, 0.10, 8, 0.16),
+  faceMaterial
+);
+face.position.set(0, 0.65, 0.43);
+robot.add(face);
 
   // 5. Eyes
 
   // 5. Interactive eyes and mouth
   const eyes = [];
 
-  for (const x of [-0.38, 0.38]) {
+  for (const x of [-0.30, 0.30]) {
     const eye = new THREE.Mesh(
       new THREE.SphereGeometry(0.13, 24, 24),
       eyeMaterial
@@ -272,8 +273,7 @@ function animate() {
 
   // Smoothly blend EYE expressions
   eyes.forEach((eye, index) => {
-    const baseX = index === 0 ? -0.38 : 0.38;
-
+    const baseX = index === 0 ? -0.30 : 0.30;
     eye.position.x = THREE.MathUtils.damp(
       eye.position.x,
       baseX + eyeOffset,
