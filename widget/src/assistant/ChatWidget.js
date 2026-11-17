@@ -241,6 +241,10 @@ function openChat() {
   let hasMoved = false;
 
 let dragDistance = 0;
+
+let activeDragMs = 0;
+let lastActiveMoveTime = null;
+
 let lastPointerX = 0;
 let lastPointerY = 0;
 let tiredDuringDrag = false;
@@ -272,6 +276,10 @@ hasMoved = false;
 
 // Reset movement tracking for this drag
 dragDistance = 0;
+
+activeDragMs = 0;
+lastActiveMoveTime = null;
+
 lastPointerX = event.clientX;
 lastPointerY = event.clientY;
 tiredDuringDrag = false;
@@ -310,12 +318,27 @@ const stepDistance = Math.hypot(
 
 dragDistance += stepDistance;
 
+// Count active movement time, excluding long pauses.
+const now = performance.now();
+
+if (stepDistance >= 2) {
+  if (lastActiveMoveTime !== null) {
+    const gap = now - lastActiveMoveTime;
+
+    if (gap > 0 && gap <= 250) {
+      activeDragMs += gap;
+    }
+  }
+
+  lastActiveMoveTime = now;
+}
+
 lastPointerX = event.clientX;
 lastPointerY = event.clientY;
 
 // Trigger fatigue after substantial movement
 if (
-  dragDistance >= 450 &&
+  activeDragMs >= 1000 &&
   !tiredDuringDrag &&
   !sending
 ) {
@@ -381,7 +404,7 @@ function finishDragging() {
       }
 
       tiredResetTimer = null;
-    }, 2000);
+    }, 3000);
   }
 }
 
