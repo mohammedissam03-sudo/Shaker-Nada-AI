@@ -1,57 +1,56 @@
-
 /* Shaker & Nada - 3D Robot Container */
 
 #optifit-robot3d-root {
-    position: fixed;
+  position: fixed;
 
-    right: 20px;
-    bottom: 20px;
+  right: 20px;
+  bottom: 20px;
 
-    width: 210px;
-    height: 260px;
+  width: 210px;
+  height: 260px;
 
-    z-index: 990;
+  z-index: 990;
 
-    background: transparent;
-    overflow: visible;
+  background: transparent;
+  overflow: visible;
 
-    /*
+  /*
      * Keep the current Laravel UI clickable.
      * Interaction will be enabled in a later step.
      */
-    pointer-events: none;
+  pointer-events: none;
 }
 
 /* Three.js Canvas */
 #optifit-robot3d-root canvas {
-    display: block;
+  display: block;
 
-    width: 100%;
-    height: 100%;
+  width: 100%;
+  height: 100%;
 
-    background: transparent;
+  background: transparent;
 }
 
 /* Tablet screens */
 @media (max-width: 900px) {
-    #optifit-robot3d-root {
-        width: 170px;
-        height: 210px;
+  #optifit-robot3d-root {
+    width: 170px;
+    height: 210px;
 
-        right: 12px;
-        bottom: 12px;
-    }
+    right: 12px;
+    bottom: 12px;
+  }
 }
 
 /* Mobile screens */
 @media (max-width: 600px) {
-    #optifit-robot3d-root {
-        width: 130px;
-        height: 165px;
+  #optifit-robot3d-root {
+    width: 130px;
+    height: 165px;
 
-        right: 8px;
-        bottom: 8px;
-    }
+    right: 8px;
+    bottom: 8px;
+  }
 }
 
 /* Mobile Robot — Responsive V2 */
@@ -73,5 +72,111 @@
 
     right: max(8px, env(safe-area-inset-right));
     bottom: max(8px, env(safe-area-inset-bottom));
+  }
+}
+
+
+/* ==========================================
+   OptiFit AI - Smooth Robot Scaling V2
+   ========================================== */
+
+/* Normal robot */
+#optifit-robot3d-root {
+  width: 250px;
+  height: 315px;
+
+  transform-origin: right bottom;
+  transform: scale(1);
+
+  transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Expanded robot */
+
+#optifit-robot3d-root.sn-robot--immersive {
+  transform: scale(2.0);
+  z-index: 1200;
+}
+
+
+/* Medium desktop */
+@media (min-width: 1301px) and (max-width: 1499px) {
+  #optifit-robot3d-root.sn-robot--immersive {
+    transform: scale(1.75);
+  }
+}
+
+/* Small desktop */
+@media (min-width: 1121px) and (max-width: 1300px) {
+  #optifit-robot3d-root.sn-robot--immersive {
+    transform: scale(1.5);
+  }
+}
+
+@media (min-width: 901px) and (max-width: 1120px) {
+  #optifit-robot3d-root.sn-robot--immersive {
+    transform: scale(1.35);
+  }
+}
+
+/* Tablet */
+@media (min-width: 641px) and (max-width: 900px) {
+  #optifit-robot3d-root {
+    width: 195px;
+    height: 250px;
+  }
+
+  #optifit-robot3d-root.sn-robot--immersive {
+    transform: scale(1.1);
+  }
+}
+
+@media (min-width: 701px) and (max-width: 799px) {
+  #optifit-robot3d-root.sn-robot--immersive {
+    transform: scale(1.2);
+  }
+}
+
+
+
+/* Larger robot before opening chat - 800px to 900px */
+@media (min-width: 800px) and (max-width: 900px) {
+  #optifit-robot3d-root {
+    width: 235px;
+    height: 300px;
+  }
+
+  #optifit-robot3d-root.sn-robot--immersive {
+    transform: scale(1.33);
+  }
+}
+
+
+
+/* Mobile */
+@media (max-width: 640px) {
+  #optifit-robot3d-root {
+    width: 145px;
+    height: 190px;
+  }
+
+  #optifit-robot3d-root.sn-robot--immersive {
+    transform:
+      translateY(calc(-100dvh + 257.5px)) scale(1.25);
+  }
+}
+
+/* Short mobile screens */
+@media (max-width: 640px) and (max-height: 650px) {
+  #optifit-robot3d-root.sn-robot--immersive {
+    transform:
+      translateY(calc(-100dvh + 229px)) scale(1.1);
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  #optifit-robot3d-root {
+    transition: none;
   }
 }

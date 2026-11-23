@@ -38,10 +38,24 @@ export default defineConfig({
       configureServer(server) {
         const token = loadInternalToken();
 
+
         server.middlewares.use(
-          '/api/chat',
-          async (req, res) => {
+          '/api',
+          async (req, res, next) => {
+            const pathname = new URL(
+              req.url || '/',
+              'http://localhost'
+            ).pathname;
+
+            const isChat = pathname === '/chat';
+            const isPopup = pathname === '/smart-popup';
+
+            if (!isChat && !isPopup) {
+              return next();
+            }
+
             function sendError(status, detail) {
+
               res.writeHead(status, {
                 'Content-Type': 'application/json',
                 'Cache-Control': 'no-store'
@@ -85,29 +99,39 @@ export default defineConfig({
                 return;
               }
 
+
+              const upstreamPath = isChat
+                ? '/internal/chat'
+                : '/internal/smart-popup';
+
+              const forwardedBody = isChat
+                ? {
+                  ...body,
+                  owner_id: 'local-development-user'
+                }
+                : body;
+
               const upstream = await fetch(
-                'http://127.0.0.1:8000/internal/chat',
+                `http://127.0.0.1:8000${upstreamPath}`,
                 {
                   method: 'POST',
                   headers: {
                     'Content-Type': 'application/json',
                     'X-Internal-Token': token
                   },
-                  body: JSON.stringify({
-                    ...body,
-                    owner_id: 'local-development-user'
-                  })
+                  body: JSON.stringify(forwardedBody)
                 }
               );
 
+
               const responseText = await upstream.text();
 
+
               res.writeHead(upstream.status, {
-                'Content-Type':
-                  upstream.headers.get('content-type') ||
-                  'application/json',
+                'Content-Type': 'application/json; charset=utf-8',
                 'Cache-Control': 'no-store'
               });
+
 
               res.end(responseText);
 
